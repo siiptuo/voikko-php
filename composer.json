@@ -1,0 +1,17 @@
+{
+    "name": "siiptuo/voikko",
+    "description": "bindings for libvoikko",
+    "license": "(MPL-1.1 OR GPL-2.0-or-later OR LGPL-2.1-or-later)",
+    "authors": [
+        {
+            "name": "Tuomas Siipola",
+            "email": "tuomas@zpl.fi"
+        }
+    ],
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "Siiptuo\\Voikko\\": "src/"
+        }
+    }
+}
