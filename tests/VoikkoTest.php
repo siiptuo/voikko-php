@@ -21,9 +21,12 @@ final class VoikkoTest extends TestCase
     public function testAnalyzeWord(): void
     {
         $analysis = $this->voikko->analyzeWord("olin");
+        $this->assertEquals(null, $analysis[-1]);
         $this->assertEquals("olka", $analysis[0]->baseform);
         $this->assertEquals("olla", $analysis[1]->baseform);
         $this->assertEquals(null, $analysis[2]);
+        $this->assertEquals(null, $analysis['0']);
+        $this->assertEquals(null, $analysis['X']);
     }
 
     public function testMorAnalyzeArrayIndices(): void
