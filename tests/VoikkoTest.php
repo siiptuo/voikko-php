@@ -23,6 +23,7 @@ final class VoikkoTest extends TestCase
         $analysis = $this->voikko->analyzeWord("olin");
         $this->assertEquals("olka", $analysis[0]->baseform);
         $this->assertEquals("olla", $analysis[1]->baseform);
+        $this->assertEquals(null, $analysis[2]);
     }
 
     public function testMorAnalyzeArrayIndices(): void
@@ -32,6 +33,7 @@ final class VoikkoTest extends TestCase
         $this->assertTrue(isset($analysis[0]), "index 0");
         $this->assertTrue(isset($analysis[1]), "index 1");
         $this->assertFalse(isset($analysis[2]), "index 2");
-        $this->assertFalse(isset($analysis['X']), "index X");
+        $this->assertFalse(isset($analysis['0']), "index '0'");
+        $this->assertFalse(isset($analysis['X']), "index 'X'");
     }
 }

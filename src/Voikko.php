@@ -75,7 +75,7 @@ class MorAnalysisArray implements ArrayAccess
 
     function offsetGet($offset)
     {
-        return new MorAnalysis($this->ffi, $this->analysis[$offset]);
+        return $this->offsetExists($offset) ? new MorAnalysis($this->ffi, $this->analysis[$offset]) : null;
     }
 
     function offsetSet($offset, $value)
