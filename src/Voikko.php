@@ -60,7 +60,7 @@ class MorAnalysisArray implements ArrayAccess
         $this->ffi = $ffi;
         $this->voikko = $voikko;
         $this->analysis = $analysis;
-        while ($this->analysis[++$this->size]);
+        while (!FFI::isNull($this->analysis[++$this->size]));
     }
 
     function __destruct()
