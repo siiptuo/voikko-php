@@ -1,0 +1,23 @@
+name: Test
+on: [push, pull_request]
+jobs:
+  run:
+    runs-on: ${{ matrix.operating-system }}
+    strategy:
+      matrix:
+        operating-system: ['ubuntu-latest']
+        php-version: ['7.4', '8.0']
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: ${{ matrix.php-version }}
+        extensions: ffi
+    - name: Install voikko
+      run: sudo apt-get install -yq libvoikko1 voikko-fi
+    - name: Install PHP dependencies
+      run: composer install
+    - name: Run tests
+      run: composer run-script test
