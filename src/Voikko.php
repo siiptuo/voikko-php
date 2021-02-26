@@ -5,8 +5,15 @@ use \Exception;
 
 class MorAnalysisValue
 {
-    function __construct(private $ffi, private $analysis, private $value)
+    private $ffi;
+    private $analysis;
+    private $value;
+
+    function __construct($ffi, $analysis, $value)
     {
+        $this->ffi = $ffi;
+        $this->analysis = $analysis;
+        $this->value = $value;
     }
 
     function __destruct()
@@ -21,8 +28,15 @@ class MorAnalysisValue
 
 class MorAnalysis
 {
-    function __construct(private $ffi, private $voikko, private $analysis)
+    private $ffi;
+    private $voikko;
+    private $analysis;
+
+    function __construct($ffi, $voikko, $analysis)
     {
+        $this->ffi = $ffi;
+        $this->voikko = $voikko;
+        $this->analysis = $analysis;
     }
 
     function __destruct()
