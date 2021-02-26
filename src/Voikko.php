@@ -50,7 +50,7 @@ class MorAnalysis
     }
 }
 
-class MorAnalysisArray implements ArrayAccess
+class MorAnalyses implements ArrayAccess
 {
     private $ffi;
     private $parent;
@@ -82,12 +82,12 @@ class MorAnalysisArray implements ArrayAccess
 
     function offsetSet($offset, $value)
     {
-        throw VoikkoException('MorAnalysisArray is immutable');
+        throw VoikkoException('MorAnalyses is immutable');
     }
 
     function offsetUnset($offset)
     {
-        throw VoikkoException('MorAnalysisArray is immutable');
+        throw VoikkoException('MorAnalyses is immutable');
     }
 }
 
@@ -140,10 +140,10 @@ class Voikko
 
     function analyzeWord($word)
     {
-        $analysis = self::$ffi->voikkoAnalyzeWordCstr($this->voikko, $word);
-        if (FFI::isNull($analysis)) {
+        $analyses = self::$ffi->voikkoAnalyzeWordCstr($this->voikko, $word);
+        if (FFI::isNull($analyses)) {
             return null;
         }
-        return new MorAnalysisArray(self::$ffi, $this, $analysis);
+        return new MorAnalyses(self::$ffi, $this, $analyses);
     }
 }
