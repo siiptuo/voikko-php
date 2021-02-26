@@ -8,10 +8,15 @@
             "email": "tuomas@zpl.fi"
         }
     ],
-    "require": {},
     "autoload": {
         "psr-4": {
             "Siiptuo\\Voikko\\": "src/"
         }
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9"
+    },
+    "scripts": {
+        "test": "phpunit tests"
     }
 }
