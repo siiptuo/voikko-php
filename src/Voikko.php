@@ -81,7 +81,7 @@ class Voikko
                                 const char * key);
                 void voikko_free_mor_analysis_value_cstr(char * analysis_value);
                 ",
-                "libvoikko.so"
+                "libvoikko.so.1"
             );
         }
         $error = FFI::new("char*");
