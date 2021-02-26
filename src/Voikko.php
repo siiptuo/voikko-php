@@ -30,11 +30,13 @@ class MorAnalysisValue
 class MorAnalysis
 {
     private $ffi;
+    private $parent;
     private $analysis;
 
-    function __construct($ffi, $analysis)
+    function __construct($ffi, $parent, $analysis)
     {
         $this->ffi = $ffi;
+        $this->parent = $parent;
         $this->analysis = $analysis;
     }
 
@@ -51,21 +53,21 @@ class MorAnalysis
 class MorAnalysisArray implements ArrayAccess
 {
     private $ffi;
-    private $voikko;
-    private $analysis;
+    private $parent;
+    private $analyses;
     private $size = 0;
 
-    function __construct($ffi, $voikko, $analysis)
+    function __construct($ffi, $parent, $analyses)
     {
         $this->ffi = $ffi;
-        $this->voikko = $voikko;
-        $this->analysis = $analysis;
-        while (!FFI::isNull($this->analysis[++$this->size]));
+        $this->parent = $parent;
+        $this->analyses = $analyses;
+        while (!FFI::isNull($this->analyses[++$this->size]));
     }
 
     function __destruct()
     {
-        $this->ffi->voikko_free_mor_analysis($this->analysis);
+        $this->ffi->voikko_free_mor_analysis($this->analyses);
     }
 
     function offsetExists($offset)
@@ -75,7 +77,7 @@ class MorAnalysisArray implements ArrayAccess
 
     function offsetGet($offset)
     {
-        return $this->offsetExists($offset) ? new MorAnalysis($this->ffi, $this->analysis[$offset]) : null;
+        return $this->offsetExists($offset) ? new MorAnalysis($this->ffi, $this, $this->analyses[$offset]) : null;
     }
 
     function offsetSet($offset, $value)
@@ -142,6 +144,6 @@ class Voikko
         if (FFI::isNull($analysis)) {
             return null;
         }
-        return new MorAnalysisArray(self::$ffi, $this->voikko, $analysis);
+        return new MorAnalysisArray(self::$ffi, $this, $analysis);
     }
 }

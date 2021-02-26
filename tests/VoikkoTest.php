@@ -18,6 +18,11 @@ final class VoikkoTest extends TestCase
         );
     }
 
+    public function testAnalyzeLifetime(): void
+    {
+        $this->assertEquals("kissa", $this->voikko->analyzeWord("kissammeko")[0]->baseform);
+    }
+
     public function testAnalyzeWord(): void
     {
         $analysis = $this->voikko->analyzeWord("olin");
