@@ -2,6 +2,7 @@
 namespace Siiptuo\Voikko;
 use \FFI;
 use \Exception;
+use \ArrayAccess;
 
 class MorAnalysisValue
 {
@@ -29,14 +30,37 @@ class MorAnalysisValue
 class MorAnalysis
 {
     private $ffi;
+    private $analysis;
+
+    function __construct($ffi, $analysis)
+    {
+        $this->ffi = $ffi;
+        $this->analysis = $analysis;
+    }
+
+    function __get($key)
+    {
+        $value = $this->ffi->voikko_mor_analysis_value_cstr($this->analysis, strtoupper($key));
+        if ($value == null) {
+            return null;
+        }
+        return new MorAnalysisValue($this->ffi, $this->analysis, $value);
+    }
+}
+
+class MorAnalysisArray implements ArrayAccess
+{
+    private $ffi;
     private $voikko;
     private $analysis;
+    private $size = 0;
 
     function __construct($ffi, $voikko, $analysis)
     {
         $this->ffi = $ffi;
         $this->voikko = $voikko;
         $this->analysis = $analysis;
+        while ($this->analysis[++$this->size]);
     }
 
     function __destruct()
@@ -44,13 +68,24 @@ class MorAnalysis
         $this->ffi->voikko_free_mor_analysis($this->analysis);
     }
 
-    function __get($key)
+    function offsetExists($offset)
     {
-        $value = $this->ffi->voikko_mor_analysis_value_cstr($this->analysis[0], strtoupper($key));
-        if ($value == null) {
-            return null;
-        }
-        return new MorAnalysisValue($this->ffi, $this->analysis, $value);
+        return is_int($offset) && $offset >= 0 && $offset < $this->size;
+    }
+
+    function offsetGet($offset)
+    {
+        return new MorAnalysis($this->ffi, $this->analysis[$offset]);
+    }
+
+    function offsetSet($offset, $value)
+    {
+        throw VoikkoException('MorAnalysisArray is immutable');
+    }
+
+    function offsetUnset($offset)
+    {
+        throw VoikkoException('MorAnalysisArray is immutable');
     }
 }
 
@@ -107,6 +142,6 @@ class Voikko
         if (FFI::isNull($analysis)) {
             return null;
         }
-        return new MorAnalysis(self::$ffi, $this->voikko, $analysis);
+        return new MorAnalysisArray(self::$ffi, $this->voikko, $analysis);
     }
 }
