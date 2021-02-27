@@ -184,9 +184,9 @@ class Voikko
     private static ?FFI $ffi = null;
     private FFI\CData $voikko;
 
-    public function __construct(string $lang, string $path = null, string $library_path = "libvoikko.so.1")
+    public function __construct(string $lang, string $dictionaryPath = null, string $libraryPath = "libvoikko.so.1")
     {
-        // XXX: $ffi will be cached even if $library_path is different
+        // XXX: $ffi will be cached even if $libraryPath is different
         if (self::$ffi == null) {
             self::$ffi = FFI::cdef(
                 "
@@ -205,11 +205,11 @@ class Voikko
                                 const char * key);
                 void voikko_free_mor_analysis_value_cstr(char * analysis_value);
                 ",
-                $library_path
+                $libraryPath
             );
         }
         $error = FFI::new("char*");
-        $handle = self::$ffi->voikkoInit(FFI::addr($error), $lang, $path);
+        $handle = self::$ffi->voikkoInit(FFI::addr($error), $lang, $dictionaryPath);
         if (!FFI::isNull($error)) {
             throw new Exception(FFI::string($error));
         }
