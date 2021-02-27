@@ -1,7 +1,6 @@
 <?php
 namespace Siiptuo\Voikko;
 use \FFI;
-use \Exception;
 use \ArrayAccess;
 use \Countable;
 use \Iterator;
@@ -85,12 +84,12 @@ class MorAnalyses implements ArrayAccess, Countable, Iterator
 
     function offsetSet($offset, $value)
     {
-        throw new VoikkoException('MorAnalyses is immutable');
+        throw new Exception('MorAnalyses is immutable');
     }
 
     function offsetUnset($offset)
     {
-        throw new VoikkoException('MorAnalyses is immutable');
+        throw new Exception('MorAnalyses is immutable');
     }
 
     function count()
@@ -122,10 +121,6 @@ class MorAnalyses implements ArrayAccess, Countable, Iterator
     {
         return $this->offsetExists($this->position);
     }
-}
-
-class VoikkoException extends Exception
-{
 }
 
 class Voikko

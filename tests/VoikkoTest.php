@@ -1,13 +1,13 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
-use Siiptuo\Voikko\Voikko;
+use Siiptuo\Voikko;
 
 final class VoikkoTest extends TestCase
 {
     protected function setUp(): void
     {
-        $this->voikko = new Voikko("fi");
+        $this->voikko = new Voikko\Voikko("fi");
     }
 
     public function testHyphenate(): void
@@ -25,7 +25,7 @@ final class VoikkoTest extends TestCase
 
     public function testMorAnalysesSetOffset(): void
     {
-        $this->expectException(VoikkoException::class);
+        $this->expectException(Voikko\Exception::class);
         $this->expectExceptionMessage("MorAnalyses is immutable");
         $analysis = $this->voikko->analyzeWord("kissammeko");
         $analysis[0] = "koira";
@@ -33,7 +33,7 @@ final class VoikkoTest extends TestCase
 
     public function testMorAnalysesSetUnset(): void
     {
-        $this->expectException(VoikkoException::class);
+        $this->expectException(Voikko\Exception::class);
         $this->expectExceptionMessage("MorAnalyses is immutable");
         $analysis = $this->voikko->analyzeWord("kissammeko");
         unset($analysis[0]);
