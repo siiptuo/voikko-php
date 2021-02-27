@@ -85,12 +85,12 @@ class MorAnalyses implements ArrayAccess, Countable, Iterator
 
     function offsetSet($offset, $value)
     {
-        throw VoikkoException('MorAnalyses is immutable');
+        throw new VoikkoException('MorAnalyses is immutable');
     }
 
     function offsetUnset($offset)
     {
-        throw VoikkoException('MorAnalyses is immutable');
+        throw new VoikkoException('MorAnalyses is immutable');
     }
 
     function count()

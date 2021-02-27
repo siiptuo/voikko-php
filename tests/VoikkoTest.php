@@ -23,7 +23,23 @@ final class VoikkoTest extends TestCase
         $this->assertEquals("kissa", $this->voikko->analyzeWord("kissammeko")[0]->baseform);
     }
 
-    public function testAnalyzeWord(): void
+    public function testMorAnalysesSetOffset(): void
+    {
+        $this->expectException(VoikkoException::class);
+        $this->expectExceptionMessage("MorAnalyses is immutable");
+        $analysis = $this->voikko->analyzeWord("kissammeko");
+        $analysis[0] = "koira";
+    }
+
+    public function testMorAnalysesSetUnset(): void
+    {
+        $this->expectException(VoikkoException::class);
+        $this->expectExceptionMessage("MorAnalyses is immutable");
+        $analysis = $this->voikko->analyzeWord("kissammeko");
+        unset($analysis[0]);
+    }
+
+    public function testMorAnalysesGetOffset(): void
     {
         $analysis = $this->voikko->analyzeWord("olin");
         $this->assertEquals(null, $analysis[-1]);
@@ -34,7 +50,7 @@ final class VoikkoTest extends TestCase
         $this->assertEquals(null, $analysis['X']);
     }
 
-    public function testMorAnalyzeArrayIndices(): void
+    public function testMorAnalysesOffsetExists(): void
     {
         $analysis = $this->voikko->analyzeWord("olin");
         $this->assertFalse(isset($analysis[-1]), "index -1");
