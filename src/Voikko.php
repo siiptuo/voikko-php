@@ -3,6 +3,8 @@ namespace Siiptuo\Voikko;
 use \FFI;
 use \Exception;
 use \ArrayAccess;
+use \Countable;
+use \Iterator;
 
 class MorAnalysisValue
 {
@@ -50,12 +52,13 @@ class MorAnalysis
     }
 }
 
-class MorAnalyses implements ArrayAccess
+class MorAnalyses implements ArrayAccess, Countable, Iterator
 {
     private $ffi;
     private $parent;
     private $analyses;
     private $size = 0;
+    private $position = 0;
 
     function __construct($ffi, $parent, $analyses)
     {
@@ -88,6 +91,36 @@ class MorAnalyses implements ArrayAccess
     function offsetUnset($offset)
     {
         throw VoikkoException('MorAnalyses is immutable');
+    }
+
+    function count()
+    {
+        return $this->size;
+    }
+
+    function current()
+    {
+        return $this->offsetGet($this->position);
+    }
+
+    function key()
+    {
+        return $this->position;
+    }
+
+    function next()
+    {
+        $this->position++;
+    }
+
+    function rewind()
+    {
+        $this->position = 0;
+    }
+
+    function valid()
+    {
+        return $this->offsetExists($this->position);
     }
 }
 

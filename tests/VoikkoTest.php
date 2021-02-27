@@ -44,4 +44,28 @@ final class VoikkoTest extends TestCase
         $this->assertFalse(isset($analysis['0']), "index '0'");
         $this->assertFalse(isset($analysis['X']), "index 'X'");
     }
+
+    public function testMorAnalysesCountable(): void
+    {
+        $this->assertEquals(2, count($this->voikko->analyzeWord("olin")));
+    }
+
+    public function testMorAnalysesIterator(): void
+    {
+        $it = $this->voikko->analyzeWord("olin");
+        for ($i = 0; $i < 2; $i++) {
+            $this->assertTrue($it->valid());
+            $this->assertEquals(0, $it->key());
+            $this->assertEquals("olka", $it->current()->baseform);
+            $it->next();
+            $this->assertTrue($it->valid());
+            $this->assertEquals(1, $it->key());
+            $this->assertEquals("olla", $it->current()->baseform);
+            $it->next();
+            $this->assertFalse($it->valid());
+            $this->assertEquals(2, $it->key());
+            $this->assertEquals(null, $it->current());
+            $it->rewind();
+        }
+    }
 }

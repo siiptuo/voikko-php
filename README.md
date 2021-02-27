@@ -9,5 +9,7 @@ $voikko = new \Siiptuo\Voikko\Voikko("fi");
 $word = "kissammeko";
 echo "       word: " . $word . PHP_EOL;
 echo "hyphenation: " . $voikko->hyphenate($word) . PHP_EOL;
-echo "   baseform: " . $voikko->analyzeWord($word)[0]->baseform . PHP_EOL;
+foreach ($voikko->analyzeWord($word) as $analysis) {
+    echo "   baseform: " . $analysis->baseform . PHP_EOL;
+}
 ```
