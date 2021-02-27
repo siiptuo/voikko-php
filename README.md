@@ -2,6 +2,12 @@
 
 Work-in-progress PHP bindings for [libvoikko](https://voikko.puimula.org/) based on [PHP FFI](https://www.php.net/manual/en/book.ffi.php).
 
+## Requirements
+
+- PHP 7.4 or newer
+- libvoikko (`libvoikko0` package in Ubuntu)
+- Voikko dictionary (`voikko-fi` package in Ubuntu)
+
 ## Example
 
 ```php
