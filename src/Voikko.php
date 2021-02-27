@@ -8,14 +8,14 @@ use \Iterator;
 
 class MorAnalysisValue
 {
-    private $ffi;
-    private $analysis;
-    private $value;
+    private FFI $ffi;
+    private MorAnalysis $parent;
+    private FFI\CData $value;
 
-    public function __construct($ffi, $analysis, $value)
+    public function __construct(FFI $ffi, MorAnalysis $parent, FFI\CData $value)
     {
         $this->ffi = $ffi;
-        $this->analysis = $analysis;
+        $this->parent = $parent;
         $this->value = $value;
     }
 
@@ -30,38 +30,46 @@ class MorAnalysisValue
     }
 }
 
+/**
+ * @property ?MorAnalysisValue $baseform
+ * TODO: add all properties
+ */
 class MorAnalysis
 {
-    private $ffi;
-    private $parent;
-    private $analysis;
+    private FFI $ffi;
+    private MorAnalyses $parent;
+    private FFI\CData $analysis;
 
-    public function __construct($ffi, $parent, $analysis)
+    public function __construct(FFI $ffi, MorAnalyses $parent, FFI\CData $analysis)
     {
         $this->ffi = $ffi;
         $this->parent = $parent;
         $this->analysis = $analysis;
     }
 
-    public function __get($key)
+    public function __get(string $key): ?MorAnalysisValue
     {
         $value = $this->ffi->voikko_mor_analysis_value_cstr($this->analysis, strtoupper($key));
         if ($value == null) {
             return null;
         }
-        return new MorAnalysisValue($this->ffi, $this->analysis, $value);
+        return new MorAnalysisValue($this->ffi, $this, $value);
     }
 }
 
+/**
+ * @implements ArrayAccess<int, MorAnalysis>
+ * @implements Iterator<int, MorAnalysis>
+ */
 class MorAnalyses implements ArrayAccess, Countable, Iterator
 {
-    private $ffi;
-    private $parent;
-    private $analyses;
-    private $size = 0;
-    private $position = 0;
+    private FFI $ffi;
+    private Voikko $parent;
+    private FFI\CData $analyses;
+    private int $size = 0;
+    private int $position = 0;
 
-    public function __construct($ffi, $parent, $analyses)
+    public function __construct(FFI $ffi, Voikko $parent, FFI\CData $analyses)
     {
         $this->ffi = $ffi;
         $this->parent = $parent;
@@ -76,22 +84,22 @@ class MorAnalyses implements ArrayAccess, Countable, Iterator
         $this->ffi->voikko_free_mor_analysis($this->analyses);
     }
 
-    public function offsetExists($offset)
+    public function offsetExists(mixed $offset)
     {
         return is_int($offset) && $offset >= 0 && $offset < $this->size;
     }
 
-    public function offsetGet($offset)
+    public function offsetGet(mixed $offset)
     {
         return $this->offsetExists($offset) ? new MorAnalysis($this->ffi, $this, $this->analyses[$offset]) : null;
     }
 
-    public function offsetSet($offset, $value)
+    public function offsetSet(mixed $offset, mixed $value)
     {
         throw new Exception('MorAnalyses is immutable');
     }
 
-    public function offsetUnset($offset)
+    public function offsetUnset(mixed $offset)
     {
         throw new Exception('MorAnalyses is immutable');
     }
@@ -101,7 +109,7 @@ class MorAnalyses implements ArrayAccess, Countable, Iterator
         return $this->size;
     }
 
-    public function current()
+    public function current(): ?MorAnalysis
     {
         return $this->offsetGet($this->position);
     }
@@ -129,9 +137,10 @@ class MorAnalyses implements ArrayAccess, Countable, Iterator
 
 class Voikko
 {
-    private static $ffi = null;
+    private static ?FFI $ffi = null;
+    private FFI\CData $voikko;
 
-    public function __construct($lang, $path = null)
+    public function __construct(string $lang, string $path = null)
     {
         if (self::$ffi == null) {
             self::$ffi = FFI::cdef(
@@ -154,10 +163,11 @@ class Voikko
             );
         }
         $error = FFI::new("char*");
-        $this->voikko = self::$ffi->voikkoInit(FFI::addr($error), $lang, $path);
+        $handle = self::$ffi->voikkoInit(FFI::addr($error), $lang, $path);
         if (!FFI::isNull($error)) {
             throw new Exception(FFI::string($error));
         }
+        $this->voikko = $handle;
     }
 
     public function __destruct()
@@ -165,12 +175,12 @@ class Voikko
         self::$ffi->voikkoTerminate($this->voikko);
     }
 
-    public function hyphenate($word)
+    public function hyphenate(string $word): string
     {
         return FFI::string(self::$ffi->voikkoHyphenateCstr($this->voikko, $word));
     }
 
-    public function analyzeWord($word)
+    public function analyzeWord(string $word): ?MorAnalyses
     {
         $analyses = self::$ffi->voikkoAnalyzeWordCstr($this->voikko, $word);
         if (FFI::isNull($analyses) || FFI::isNull($analyses[0])) {

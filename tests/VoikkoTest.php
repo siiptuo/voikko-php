@@ -5,6 +5,8 @@ use Siiptuo\Voikko;
 
 final class VoikkoTest extends TestCase
 {
+    private Voikko\Voikko $voikko;
+
     protected function setUp(): void
     {
         $this->voikko = new Voikko\Voikko("fi");
