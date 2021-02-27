@@ -1,7 +1,7 @@
 name: Test
 on: [push, pull_request]
 jobs:
-  run:
+  test:
     runs-on: ${{ matrix.operating-system }}
     strategy:
       matrix:
@@ -21,3 +21,14 @@ jobs:
       run: composer install
     - name: Run tests
       run: composer run-script test
+  code-style:
+    runs-on: 'ubuntu-latest'
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+    - name: Install PHP dependencies
+      run: composer install
+    - name: Test code style
+      run: ./vendor/bin/php-cs-fixer fix -v --dry-run --stop-on-violation .

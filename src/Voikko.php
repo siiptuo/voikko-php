@@ -1,5 +1,6 @@
 <?php
 namespace Siiptuo\Voikko;
+
 use \FFI;
 use \ArrayAccess;
 use \Countable;
@@ -11,19 +12,20 @@ class MorAnalysisValue
     private $analysis;
     private $value;
 
-    function __construct($ffi, $analysis, $value)
+    public function __construct($ffi, $analysis, $value)
     {
         $this->ffi = $ffi;
         $this->analysis = $analysis;
         $this->value = $value;
     }
 
-    function __destruct()
+    public function __destruct()
     {
         $this->ffi->voikko_free_mor_analysis_value_cstr($this->value);
     }
 
-    function __toString() {
+    public function __toString()
+    {
         return FFI::string($this->value);
     }
 }
@@ -34,14 +36,14 @@ class MorAnalysis
     private $parent;
     private $analysis;
 
-    function __construct($ffi, $parent, $analysis)
+    public function __construct($ffi, $parent, $analysis)
     {
         $this->ffi = $ffi;
         $this->parent = $parent;
         $this->analysis = $analysis;
     }
 
-    function __get($key)
+    public function __get($key)
     {
         $value = $this->ffi->voikko_mor_analysis_value_cstr($this->analysis, strtoupper($key));
         if ($value == null) {
@@ -59,7 +61,7 @@ class MorAnalyses implements ArrayAccess, Countable, Iterator
     private $size = 0;
     private $position = 0;
 
-    function __construct($ffi, $parent, $analyses)
+    public function __construct($ffi, $parent, $analyses)
     {
         $this->ffi = $ffi;
         $this->parent = $parent;
@@ -67,57 +69,57 @@ class MorAnalyses implements ArrayAccess, Countable, Iterator
         while (!FFI::isNull($this->analyses[++$this->size]));
     }
 
-    function __destruct()
+    public function __destruct()
     {
         $this->ffi->voikko_free_mor_analysis($this->analyses);
     }
 
-    function offsetExists($offset)
+    public function offsetExists($offset)
     {
         return is_int($offset) && $offset >= 0 && $offset < $this->size;
     }
 
-    function offsetGet($offset)
+    public function offsetGet($offset)
     {
         return $this->offsetExists($offset) ? new MorAnalysis($this->ffi, $this, $this->analyses[$offset]) : null;
     }
 
-    function offsetSet($offset, $value)
+    public function offsetSet($offset, $value)
     {
         throw new Exception('MorAnalyses is immutable');
     }
 
-    function offsetUnset($offset)
+    public function offsetUnset($offset)
     {
         throw new Exception('MorAnalyses is immutable');
     }
 
-    function count()
+    public function count()
     {
         return $this->size;
     }
 
-    function current()
+    public function current()
     {
         return $this->offsetGet($this->position);
     }
 
-    function key()
+    public function key()
     {
         return $this->position;
     }
 
-    function next()
+    public function next()
     {
         $this->position++;
     }
 
-    function rewind()
+    public function rewind()
     {
         $this->position = 0;
     }
 
-    function valid()
+    public function valid()
     {
         return $this->offsetExists($this->position);
     }
@@ -127,7 +129,7 @@ class Voikko
 {
     private static $ffi = null;
 
-    function __construct($lang, $path = null)
+    public function __construct($lang, $path = null)
     {
         if (self::$ffi == null) {
             self::$ffi = FFI::cdef(
@@ -156,17 +158,17 @@ class Voikko
         }
     }
 
-    function __destruct()
+    public function __destruct()
     {
         self::$ffi->voikkoTerminate($this->voikko);
     }
 
-    function hyphenate($word)
+    public function hyphenate($word)
     {
         return FFI::string(self::$ffi->voikkoHyphenateCstr($this->voikko, $word));
     }
 
-    function analyzeWord($word)
+    public function analyzeWord($word)
     {
         $analyses = self::$ffi->voikkoAnalyzeWordCstr($this->voikko, $word);
         if (FFI::isNull($analyses)) {
