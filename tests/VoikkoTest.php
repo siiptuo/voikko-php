@@ -10,6 +10,13 @@ final class VoikkoTest extends TestCase
         $this->voikko = new Voikko\Voikko("fi");
     }
 
+    public function testInitializationError(): void
+    {
+        $this->expectException(Voikko\Exception::class);
+        $this->expectExceptionMessage("Specified dictionary variant was not found");
+        new Voikko\Voikko("xy");
+    }
+
     public function testHyphenate(): void
     {
         $this->assertEquals(

@@ -154,7 +154,7 @@ class Voikko
         $error = FFI::new("char*");
         $this->voikko = self::$ffi->voikkoInit(FFI::addr($error), $lang, $path);
         if (!FFI::isNull($error)) {
-            throw new VoikkoException(FFI::string($error));
+            throw new Exception(FFI::string($error));
         }
     }
 
