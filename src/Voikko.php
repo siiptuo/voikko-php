@@ -84,22 +84,22 @@ class MorAnalyses implements ArrayAccess, Countable, Iterator
         $this->ffi->voikko_free_mor_analysis($this->analyses);
     }
 
-    public function offsetExists(mixed $offset)
+    public function offsetExists($offset)
     {
         return is_int($offset) && $offset >= 0 && $offset < $this->size;
     }
 
-    public function offsetGet(mixed $offset)
+    public function offsetGet($offset)
     {
         return $this->offsetExists($offset) ? new MorAnalysis($this->ffi, $this, $this->analyses[$offset]) : null;
     }
 
-    public function offsetSet(mixed $offset, mixed $value)
+    public function offsetSet($offset, $value)
     {
         throw new Exception('MorAnalyses is immutable');
     }
 
-    public function offsetUnset(mixed $offset)
+    public function offsetUnset($offset)
     {
         throw new Exception('MorAnalyses is immutable');
     }
