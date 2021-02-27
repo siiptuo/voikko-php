@@ -28,6 +28,11 @@ class MorAnalysisValue
     {
         return FFI::string($this->value);
     }
+
+    public function __debugInfo()
+    {
+        return [(string)$this];
+    }
 }
 
 /**
@@ -54,6 +59,31 @@ class MorAnalysis
             return null;
         }
         return new MorAnalysisValue($this->ffi, $this, $value);
+    }
+
+    public function keys(): array
+    {
+        $keys = [];
+        $result = $this->ffi->voikko_mor_analysis_keys($this->analysis);
+        while (!FFI::isNull($result[0])) {
+            $keys[] = FFI::string($result[0]);
+            $result++;
+        }
+        return $keys;
+    }
+
+    public function toArray(): array
+    {
+        $result = [];
+        foreach ($this->keys() as $key) {
+            $result[$key] = (string)$this->$key;
+        }
+        return $result;
+    }
+
+    public function __debugInfo()
+    {
+        return $this->toArray();
     }
 }
 
@@ -133,6 +163,20 @@ class MorAnalyses implements ArrayAccess, Countable, Iterator
     {
         return $this->offsetExists($this->position);
     }
+
+    public function toArray(): array
+    {
+        $result = [];
+        for ($i = 0; $i < $this->size; $i++) {
+            $result[$i] = $this[$i]->toArray();
+        }
+        return $result;
+    }
+
+    public function __debugInfo()
+    {
+        return $this->toArray();
+    }
 }
 
 class Voikko
@@ -155,6 +199,7 @@ class Voikko
                 struct voikko_mor_analysis ** voikkoAnalyzeWordCstr(
                                               struct VoikkoHandle * handle, const char * word);
                 void voikko_free_mor_analysis(struct voikko_mor_analysis ** analysis);
+                const char ** voikko_mor_analysis_keys(const struct voikko_mor_analysis * analysis);
                 char * voikko_mor_analysis_value_cstr(
                                 const struct voikko_mor_analysis * analysis,
                                 const char * key);

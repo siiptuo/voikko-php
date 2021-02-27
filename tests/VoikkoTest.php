@@ -98,4 +98,34 @@ final class VoikkoTest extends TestCase
             $it->rewind();
         }
     }
+
+    public function testAnalyzeWordKeys(): void
+    {
+        $this->assertEquals([
+            'BASEFORM',
+            'CLASS',
+            'FSTOUTPUT',
+            'KYSYMYSLIITE',
+            'NUMBER',
+            'POSSESSIVE',
+            'SIJAMUOTO',
+            'STRUCTURE',
+            'WORDBASES',
+        ], $this->voikko->analyzeWord("kissammeko")[0]->keys());
+    }
+
+    public function testAnalyzeWordToArray(): void
+    {
+        $this->assertEquals([
+            "BASEFORM" => "kissa",
+            "CLASS" => "nimisana",
+            "FSTOUTPUT" => "[Ln][Xp]kissa[X]kiss[Sn][Ny]a[O1m]mme[Fko][Ef]ko",
+            "NUMBER" => "singular",
+            "POSSESSIVE" => "1p",
+            "SIJAMUOTO" => "nimento",
+            "STRUCTURE" => "=pppppppppp",
+            "WORDBASES" => "+kissa(kissa)",
+            'KYSYMYSLIITE' => 'true',
+        ], $this->voikko->analyzeWord("kissammeko")[0]->toArray());
+    }
 }
