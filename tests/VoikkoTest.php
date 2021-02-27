@@ -25,6 +25,11 @@ final class VoikkoTest extends TestCase
         );
     }
 
+    public function testAnalyzeNotFound(): void
+    {
+        $this->assertNull($this->voikko->analyzeWord("xyz"));
+    }
+
     public function testAnalyzeLifetime(): void
     {
         $this->assertEquals("kissa", $this->voikko->analyzeWord("kissammeko")[0]->baseform);

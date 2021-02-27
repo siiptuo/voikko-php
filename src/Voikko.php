@@ -66,7 +66,9 @@ class MorAnalyses implements ArrayAccess, Countable, Iterator
         $this->ffi = $ffi;
         $this->parent = $parent;
         $this->analyses = $analyses;
-        while (!FFI::isNull($this->analyses[++$this->size]));
+        while (!FFI::isNull($this->analyses[$this->size])) {
+            $this->size++;
+        }
     }
 
     public function __destruct()
@@ -171,7 +173,7 @@ class Voikko
     public function analyzeWord($word)
     {
         $analyses = self::$ffi->voikkoAnalyzeWordCstr($this->voikko, $word);
-        if (FFI::isNull($analyses)) {
+        if (FFI::isNull($analyses) || FFI::isNull($analyses[0])) {
             return null;
         }
         return new MorAnalyses(self::$ffi, $this, $analyses);
