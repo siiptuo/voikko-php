@@ -1,22 +1,22 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
-use Siiptuo\Voikko;
+use Siiptuo\Voikko\{Voikko, Exception, Token, Sentence};
 
 final class VoikkoTest extends TestCase
 {
-    private Voikko\Voikko $voikko;
+    private Voikko $voikko;
 
     protected function setUp(): void
     {
-        $this->voikko = new Voikko\Voikko("fi");
+        $this->voikko = new Voikko("fi");
     }
 
     public function testInitializationError(): void
     {
-        $this->expectException(Voikko\Exception::class);
+        $this->expectException(Exception::class);
         $this->expectExceptionMessage("Specified dictionary variant was not found");
-        new Voikko\Voikko("xy");
+        new Voikko("xy");
     }
 
     public function testHyphenate(): void
@@ -39,7 +39,7 @@ final class VoikkoTest extends TestCase
 
     public function testMorAnalysesSetOffset(): void
     {
-        $this->expectException(Voikko\Exception::class);
+        $this->expectException(Exception::class);
         $this->expectExceptionMessage("MorAnalyses is immutable");
         $analysis = $this->voikko->analyzeWord("kissammeko");
         $analysis[0] = "koira";
@@ -47,7 +47,7 @@ final class VoikkoTest extends TestCase
 
     public function testMorAnalysesSetUnset(): void
     {
-        $this->expectException(Voikko\Exception::class);
+        $this->expectException(Exception::class);
         $this->expectExceptionMessage("MorAnalyses is immutable");
         $analysis = $this->voikko->analyzeWord("kissammeko");
         unset($analysis[0]);
@@ -127,5 +127,25 @@ final class VoikkoTest extends TestCase
             "WORDBASES" => "+kissa(kissa)",
             'KYSYMYSLIITE' => 'true',
         ], $this->voikko->analyzeWord("kissammeko")[0]->toArray());
+    }
+
+    public function testTokens(): void
+    {
+        $this->assertEquals([
+            new Token(Token::WORD, 'Tämä'),
+            new Token(Token::WHITESPACE, ' '),
+            new Token(Token::WORD, 'on'),
+            new Token(Token::WHITESPACE, ' '),
+            new Token(Token::WORD, 'testi'),
+            new Token(Token::PUNCTUATION, '.'),
+        ], $this->voikko->tokens('Tämä on testi.'));
+    }
+
+    public function testSentences(): void
+    {
+        $this->assertEquals([
+            new Sentence(Sentence::PROBABLE, 'Tämä on ensimmäinen lause. '),
+            new Sentence(Sentence::NONE, 'Tämä on toinen lause.'),
+        ], $this->voikko->sentences('Tämä on ensimmäinen lause. Tämä on toinen lause.'));
     }
 }

@@ -38,6 +38,7 @@ class MorAnalysisValue
 /**
  * @property ?MorAnalysisValue $baseform
  * TODO: add all properties
+ * TODO: make iterable
  */
 class MorAnalysis
 {
@@ -204,6 +205,12 @@ class Voikko
                                 const struct voikko_mor_analysis * analysis,
                                 const char * key);
                 void voikko_free_mor_analysis_value_cstr(char * analysis_value);
+                enum voikko_token_type {TOKEN_NONE, TOKEN_WORD, TOKEN_PUNCTUATION, TOKEN_WHITESPACE, TOKEN_UNKNOWN};
+                enum voikko_token_type voikkoNextTokenCstr(struct VoikkoHandle * handle, const char * text,
+                                       size_t textlen, size_t * tokenlen);
+                enum voikko_sentence_type {SENTENCE_NONE, SENTENCE_NO_START, SENTENCE_PROBABLE, SENTENCE_POSSIBLE};
+                enum voikko_sentence_type voikkoNextSentenceStartCstr(struct VoikkoHandle * handle,
+                                          const char * text, size_t textlen, size_t * sentencelen);
                 ",
                 $libraryPath
             );
@@ -233,5 +240,31 @@ class Voikko
             return null;
         }
         return new MorAnalyses(self::$ffi, $this, $analyses);
+    }
+
+    public function tokens(string $text): array
+    {
+        $tokens = [];
+        $tokenLength = FFI::new("size_t");
+        while (strlen($text) > 0) {
+            $type = self::$ffi->voikkoNextTokenCstr($this->voikko, $text, strlen($text), FFI::addr($tokenLength));
+            $token = mb_substr($text, 0, $tokenLength->cdata);
+            $text = substr($text, strlen($token));
+            $tokens[] = new Token($type, $token);
+        }
+        return $tokens;
+    }
+
+    public function sentences(string $text): array
+    {
+        $sentences = [];
+        $sentenceLength = FFI::new("size_t");
+        while (strlen($text) > 0) {
+            $type = self::$ffi->voikkoNextSentenceStartCstr($this->voikko, $text, strlen($text), FFI::addr($sentenceLength));
+            $sentence = mb_substr($text, 0, $sentenceLength->cdata);
+            $text = substr($text, strlen($sentence));
+            $sentences[] = new Sentence($type, $sentence);
+        }
+        return $sentences;
     }
 }
