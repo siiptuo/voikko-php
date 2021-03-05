@@ -32,3 +32,23 @@ jobs:
       run: composer install
     - name: Test code style
       run: ./vendor/bin/php-cs-fixer fix -v --dry-run --stop-on-violation .
+  docs:
+    runs-on: 'ubuntu-latest'
+    container:
+      image: phpdoc/phpdoc:3
+      volumes:
+        - ${{ github.workspace }}:/data
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: phpDocumentor
+      run: phpdoc run -d src -t docs
+    - name: Commit
+      run: |
+        git config user.name github-actions
+        git config user.email github-actions@github.com
+        git checkout -b gh-pages
+        git add docs
+        git commit -m "generated"
+        git filter-branch --prune-empty --subdirectory-filter docs gh-pages
+        git push origin gh-pages -f
