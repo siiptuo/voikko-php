@@ -44,7 +44,7 @@ class Sentence
     public string $text;
 
     /** @internal */
-    public function __construct($type, $text)
+    public function __construct(int $type, string $text)
     {
         $this->type = $type;
         $this->text = $text;

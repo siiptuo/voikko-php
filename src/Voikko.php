@@ -122,7 +122,7 @@ class Voikko
     /**
      * Split the given text into tokens.
      *
-     * @param $text Text to split into tokens.
+     * @param string $text Text to split into tokens.
      * @return array<int, Token> Array of tokens
      */
     public function tokens(string $text): array
@@ -141,7 +141,7 @@ class Voikko
     /**
      * Split the given text into sentences.
      *
-     * @param $text Text to split into sentences.
+     * @param string $text Text to split into sentences.
      * @return array<int, Sentence> Array of sentences
      */
     public function sentences(string $text): array
