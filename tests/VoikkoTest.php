@@ -1,7 +1,10 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
-use Siiptuo\Voikko\{Voikko, Exception, Token, Sentence};
+use Siiptuo\Voikko\Voikko;
+use Siiptuo\Voikko\Exception;
+use Siiptuo\Voikko\Token;
+use Siiptuo\Voikko\Sentence;
 
 final class VoikkoTest extends TestCase
 {
