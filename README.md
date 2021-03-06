@@ -11,7 +11,7 @@ Work-in-progress PHP bindings for [libvoikko](https://voikko.puimula.org/) based
 ## Example
 
 ```php
-$voikko = new \Siiptuo\Voikko\Voikko("fi");
+$voikko = new \Siiptuo\Voikko\Voikko();
 $word = "kissammeko";
 echo "       word: " . $word . PHP_EOL;
 echo "hyphenation: " . $voikko->hyphenate($word) . PHP_EOL;

@@ -200,7 +200,7 @@ class Voikko
      *
      * @throws Exception If initialization failed.
      */
-    public function __construct(string $languageCode, string $dictionaryPath = null, string $libraryPath = "libvoikko.so.1")
+    public function __construct(string $languageCode = 'fi', string $dictionaryPath = null, string $libraryPath = "libvoikko.so.1")
     {
         // XXX: $ffi will be cached even if $libraryPath is different
         if (self::$ffi == null) {

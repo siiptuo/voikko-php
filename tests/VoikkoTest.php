@@ -9,7 +9,7 @@ final class VoikkoTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->voikko = new Voikko("fi");
+        $this->voikko = new Voikko();
     }
 
     public function testInitializationError(): void
