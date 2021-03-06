@@ -49,6 +49,7 @@ class Token
      */
     public string $text;
 
+    /** @internal */
     public function __construct($type, $text)
     {
         $this->type = $type;
