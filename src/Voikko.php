@@ -180,12 +180,27 @@ class MorAnalyses implements ArrayAccess, Countable, Iterator
     }
 }
 
+/**
+ * Main class of the library.
+ */
 class Voikko
 {
+    /** @internal */
     private static ?FFI $ffi = null;
+
+    /** @internal */
     private FFI\CData $voikko;
 
-    public function __construct(string $lang, string $dictionaryPath = null, string $libraryPath = "libvoikko.so.1")
+    /**
+     * Initialises the library for use in the specified language, adding an extra directory to the standard dictionary search path.
+     *
+     * @param string $languageCode BCP 47 language tag for the language to be used. Private use subtags can be used to specify the dictionary variant.
+     * @param string $dictionaryPath Path to a directory from which dictionary files should be searched first before looking into the standard dictionary locations. If null, no additional search path will be used.
+     * @param string $libraryPath Path to libvoikko shared library.
+     *
+     * @throws Exception If initialization failed.
+     */
+    public function __construct(string $languageCode, string $dictionaryPath = null, string $libraryPath = "libvoikko.so.1")
     {
         // XXX: $ffi will be cached even if $libraryPath is different
         if (self::$ffi == null) {
@@ -216,7 +231,7 @@ class Voikko
             );
         }
         $error = FFI::new("char*");
-        $handle = self::$ffi->voikkoInit(FFI::addr($error), $lang, $dictionaryPath);
+        $handle = self::$ffi->voikkoInit(FFI::addr($error), $languageCode, $dictionaryPath);
         if (!FFI::isNull($error)) {
             throw new Exception(FFI::string($error));
         }
@@ -228,11 +243,34 @@ class Voikko
         self::$ffi->voikkoTerminate($this->voikko);
     }
 
+    /**
+     * Hyphenates the given word.
+     *
+     * The returned hyphenation pattern uses the following notation:
+     *
+     * ```
+     * ' ' = no hyphenation at this character
+     * '-' = hyphenation point (character at this position
+     *       is preserved in the hyphenated form)
+     * '=' = hyphenation point (character at this position
+     *       is replaced by the hyphen)
+     * ```
+     *
+     * @param string $word Word to hyphenate
+     * @return string String hyphenation pattern
+     */
     public function hyphenate(string $word): string
     {
+        // TODO: throw exception when zero is returned.
         return FFI::string(self::$ffi->voikkoHyphenateCstr($this->voikko, $word));
     }
 
+    /**
+     * Analyzes the morphology of given word.
+     *
+     * @param string $word Word to be analyzed.
+     * @return MorAnalyses A pointer to a null terminated array of analysis results.
+     */
     public function analyzeWord(string $word): ?MorAnalyses
     {
         $analyses = self::$ffi->voikkoAnalyzeWordCstr($this->voikko, $word);
@@ -242,6 +280,12 @@ class Voikko
         return new MorAnalyses(self::$ffi, $this, $analyses);
     }
 
+    /**
+     * Split the given text into tokens.
+     *
+     * @param $text Text to split into tokens.
+     * @return array<int, Token> Array of tokens
+     */
     public function tokens(string $text): array
     {
         $tokens = [];
@@ -255,6 +299,12 @@ class Voikko
         return $tokens;
     }
 
+    /**
+     * Split the given text into sentences.
+     *
+     * @param $text Text to split into sentences.
+     * @return array<int, Sentence> Array of sentences
+     */
     public function sentences(string $text): array
     {
         $sentences = [];
