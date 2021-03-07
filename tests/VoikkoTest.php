@@ -22,11 +22,27 @@ final class VoikkoTest extends TestCase
         new Voikko("xy");
     }
 
-    public function testHyphenate(): void
+    public function testHyphenateDefault(): void
     {
         $this->assertEquals(
-            "   -  - - ",
-            $this->voikko->hyphenate("kissammeko")
+            "lin-ja-au-tom-me-ko",
+            $this->voikko->hyphenate("linja-autommeko")
+        );
+    }
+
+    public function testHyphenateHtml(): void
+    {
+        $this->assertEquals(
+            "lin&shy;ja-au&shy;tom&shy;me&shy;ko",
+            $this->voikko->hyphenate("linja-autommeko", "&shy;")
+        );
+    }
+
+    public function testHyphenationPattern(): void
+    {
+        $this->assertEquals(
+            "   - =  -  - - ",
+            $this->voikko->hyphenationPattern("linja-autommeko")
         );
     }
 

@@ -34,6 +34,8 @@ class Voikko
                                                  const char * path);
                 void voikkoTerminate(struct VoikkoHandle * handle);
                 char * voikkoHyphenateCstr(struct VoikkoHandle * handle, const char * word);
+                char * voikkoInsertHyphensCstr(struct VoikkoHandle * handle, const char * word,
+                                               const char * hyphen, int allowContextChanges);
                 struct voikko_mor_analysis;
                 struct voikko_mor_analysis ** voikkoAnalyzeWordCstr(
                                               struct VoikkoHandle * handle, const char * word);
@@ -69,7 +71,21 @@ class Voikko
     /**
      * Hyphenates the given word.
      *
-     * The returned hyphenation pattern uses the following notation:
+     * @param string $word word to hyphenate
+     * @param string $hyphen character string to insert at hyphenation positions
+     * @param bool $allowContextChanges Whether hyphens may be inserted even if they alter the word in unhyphenated form.
+     * @return string Hyphenated word
+     */
+    public function hyphenate(string $word, string $hyphen = '-', bool $allowContextChanges = true): string
+    {
+        // TODO: error handling
+        return FFI::string(self::$ffi->voikkoInsertHyphensCstr($this->voikko, $word, $hyphen, $allowContextChanges));
+    }
+
+    /**
+     * Return hyphenation pattern for the given word.
+     *
+     * The hyphenation pattern uses the following notation:
      *
      * ```
      * ' ' = no hyphenation at this character
@@ -80,11 +96,11 @@ class Voikko
      * ```
      *
      * @param string $word Word to hyphenate
-     * @return string String hyphenation pattern
+     * @return string Hyphenation pattern
      */
-    public function hyphenate(string $word): string
+    public function hyphenationPattern(string $word): string
     {
-        // TODO: throw exception when zero is returned.
+        // TODO: error handling
         return FFI::string(self::$ffi->voikkoHyphenateCstr($this->voikko, $word));
     }
 
