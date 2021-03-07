@@ -1,10 +1,10 @@
 name: Docs
-on: push
-# TODO: only on tags
-# on:
-#   push:
-#     tags:
-#       - '*'
+on:
+  push:
+    branches:
+      - master
+    # tags:
+    #   - '*'
 jobs:
   docs:
     runs-on: 'ubuntu-latest'
