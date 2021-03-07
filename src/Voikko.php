@@ -126,10 +126,10 @@ class Voikko
         for ($i = 0; $i < strlen($word); $i++) {
             if ($pattern[$i] == ' ') {
                 $result .= $word[$i];
-            } else if ($pattern[$i] == '-') {
+            } elseif ($pattern[$i] == '-') {
                 $result .= $hyphen;
                 $result .= $word[$i];
-            } else if ($pattern[$i] == '=') {
+            } elseif ($pattern[$i] == '=') {
                 $result .= $word[$i] == '-' ? '-' : $hyphen;
             }
         }
