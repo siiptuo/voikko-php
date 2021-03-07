@@ -51,6 +51,9 @@ class Voikko
                 enum voikko_sentence_type {SENTENCE_NONE, SENTENCE_NO_START, SENTENCE_PROBABLE, SENTENCE_POSSIBLE};
                 enum voikko_sentence_type voikkoNextSentenceStartCstr(struct VoikkoHandle * handle,
                                           const char * text, size_t textlen, size_t * sentencelen);
+                char ** voikkoSuggestCstr(struct VoikkoHandle * handle, const char * word);
+                int voikkoSpellCstr(struct VoikkoHandle * handle, const char * word);
+                void voikkoFreeCstrArray(char ** cstrArray);
                 ",
                 $libraryPath
             );
@@ -66,6 +69,48 @@ class Voikko
     public function __destruct()
     {
         self::$ffi->voikkoTerminate($this->voikko);
+    }
+
+    /**
+     * Checks the spelling of the given word.
+     *
+     * @param string $word Word to check
+     * @return bool Whether the spelling is correct or not
+     *
+     * @throws Exception on error
+     */
+    public function spell(string $word): bool
+    {
+        $result = self::$ffi->voikkoSpellCstr($this->voikko, $word);
+        if ($result === 2) {
+            throw new Exception('Internal error');
+        }
+        if ($result === 3) {
+            throw new Exception('Character set conversion failed');
+        }
+        return $result === 1;
+    }
+
+    /**
+     * Finds suggested correct spellings for the given word.
+     *
+     * @param string $word Word to find suggestions for
+     * @return array<int, string> Array of suggestions
+     */
+    public function suggest(string $word): array
+    {
+        $result = [];
+        $suggestions = self::$ffi->voikkoSuggestCstr($this->voikko, $word);
+        if (FFI::isNull($suggestions) || FFI::isNull($suggestions[0])) {
+            return $result;
+        }
+        $i = 0;
+        while (!FFI::isNull($suggestions[$i])) {
+            $result[] = FFI::string($suggestions[$i]);
+            $i++;
+        }
+        self::$ffi->voikkoFreeCstrArray($suggestions);
+        return $result;
     }
 
     /**

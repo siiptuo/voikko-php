@@ -22,6 +22,20 @@ final class VoikkoTest extends TestCase
         new Voikko("xy");
     }
 
+    public function testSpell(): void
+    {
+        $this->assertFalse($this->voikko->spell("sydämmeeni"));
+        $this->assertTrue($this->voikko->spell("sydämeeni"));
+    }
+
+    public function testSuggest(): void
+    {
+        $this->assertEquals(
+            ['sydämeeni', 'sydänmeemi'],
+            $this->voikko->suggest("sydämmeeni")
+        );
+    }
+
     public function testHyphenateDefault(): void
     {
         $this->assertEquals(
