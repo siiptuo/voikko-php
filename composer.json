@@ -13,6 +13,11 @@
             "Siiptuo\\Voikko\\": "src/"
         }
     },
+    "require": {
+        "php": ">=7.4",
+        "ext-ffi": "*",
+        "ext-mbstring": "*"
+    },
     "require-dev": {
         "phpunit/phpunit": "^9",
         "friendsofphp/php-cs-fixer": "^2.18",
