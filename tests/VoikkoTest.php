@@ -125,4 +125,18 @@ final class VoikkoTest extends TestCase
             new Sentence(Sentence::NONE, 'Tämä on toinen lause.'),
         ], $this->voikko->sentences('Tämä on ensimmäinen lause. Tämä on toinen lause.'));
     }
+
+    public function testNonUtf8(): void
+    {
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage("Input must be UTF-8 encoded");
+        $this->voikko->analyzeWord(utf8_decode('ööö'));
+    }
+
+    public function testLong(): void
+    {
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage("Internal error");
+        $this->voikko->hyphenate(str_repeat('ö', 1000));
+    }
 }

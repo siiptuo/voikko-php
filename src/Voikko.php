@@ -70,6 +70,17 @@ class Voikko
         self::$ffi->voikkoTerminate($this->voikko);
     }
 
+    /** @internal */
+    private function validateInput(string $input): void
+    {
+        if (strpos($input, "\0") !== false) {
+            throw new Exception('Input must not contain null character');
+        }
+        if (!mb_check_encoding($input, 'UTF-8')) {
+            throw new Exception('Input must be UTF-8 encoded');
+        }
+    }
+
     /**
      * Checks the spelling of the given word.
      *
@@ -80,12 +91,10 @@ class Voikko
      */
     public function spell(string $word): bool
     {
+        $this->validateInput($word);
         $result = self::$ffi->voikkoSpellCstr($this->voikko, $word);
-        if ($result === 2) {
+        if ($result !== 0 && $result !== 1) {
             throw new Exception('Internal error');
-        }
-        if ($result === 3) {
-            throw new Exception('Character set conversion failed');
         }
         return $result === 1;
     }
@@ -98,9 +107,10 @@ class Voikko
      */
     public function suggest(string $word): array
     {
+        $this->validateInput($word);
         $result = [];
         $suggestions = self::$ffi->voikkoSuggestCstr($this->voikko, $word);
-        if (FFI::isNull($suggestions) || FFI::isNull($suggestions[0])) {
+        if (is_null($suggestions) || FFI::isNull($suggestions[0])) {
             return $result;
         }
         $i = 0;
@@ -124,14 +134,14 @@ class Voikko
     {
         $result = '';
         $pattern = $this->hyphenationPattern($word);
-        for ($i = 0; $i < mb_strlen($word); $i++) {
+        for ($i = 0; $i < mb_strlen($word, 'UTF-8'); $i++) {
             if ($pattern[$i] == '-') {
                 $result .= $hyphen;
-                $result .= mb_substr($word, $i, 1);
+                $result .= mb_substr($word, $i, 1, 'UTF-8');
             } elseif ($pattern[$i] == ' ' || !$allowContextChanges) {
-                $result .= mb_substr($word, $i, 1);
+                $result .= mb_substr($word, $i, 1, 'UTF-8');
             } elseif ($pattern[$i] == '=') {
-                $result .= mb_substr($word, $i, 1) == '-' ? '-' : $hyphen;
+                $result .= mb_substr($word, $i, 1, 'UTF-8') == '-' ? '-' : $hyphen;
             }
         }
         return $result;
@@ -155,8 +165,11 @@ class Voikko
      */
     public function hyphenationPattern(string $word): string
     {
-        // TODO: error handling
+        $this->validateInput($word);
         $pattern = self::$ffi->voikkoHyphenateCstr($this->voikko, $word);
+        if (is_null($pattern)) {
+            throw new Exception("Internal error");
+        }
         $result = FFI::string($pattern);
         self::$ffi->voikkoFreeCstr($pattern);
         return $result;
@@ -170,9 +183,10 @@ class Voikko
      */
     public function analyzeWord(string $word): array
     {
+        $this->validateInput($word);
         $result = [];
         $analyses = self::$ffi->voikkoAnalyzeWordCstr($this->voikko, $word);
-        if (FFI::isNull($analyses) || FFI::isNull($analyses[0])) {
+        if (is_null($analyses) || FFI::isNull($analyses[0])) {
             return $result;
         }
         $i = 0;
@@ -201,11 +215,12 @@ class Voikko
      */
     public function tokens(string $text): array
     {
+        $this->validateInput($text);
         $tokens = [];
         $tokenLength = FFI::new("size_t");
         while (strlen($text) > 0) {
             $type = self::$ffi->voikkoNextTokenCstr($this->voikko, $text, strlen($text), FFI::addr($tokenLength));
-            $token = mb_substr($text, 0, $tokenLength->cdata);
+            $token = mb_substr($text, 0, $tokenLength->cdata, 'UTF-8');
             $text = substr($text, strlen($token));
             $tokens[] = new Token($type, $token);
         }
@@ -220,11 +235,12 @@ class Voikko
      */
     public function sentences(string $text): array
     {
+        $this->validateInput($text);
         $sentences = [];
         $sentenceLength = FFI::new("size_t");
         while (strlen($text) > 0) {
             $type = self::$ffi->voikkoNextSentenceStartCstr($this->voikko, $text, strlen($text), FFI::addr($sentenceLength));
-            $sentence = mb_substr($text, 0, $sentenceLength->cdata);
+            $sentence = mb_substr($text, 0, $sentenceLength->cdata, 'UTF-8');
             $text = substr($text, strlen($sentence));
             $sentences[] = new Sentence($type, $sentence);
         }
