@@ -46,6 +46,28 @@ final class VoikkoTest extends TestCase
         );
     }
 
+    public function testAnalysisSet(): void
+    {
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage("Cannot set property baseForm. The object is immutable.");
+        $analysis = $this->voikko->analyzeWord("kissammeko")[0];
+        $analysis->baseForm = 'koira';
+    }
+
+    public function testAnalysisUnset(): void
+    {
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage("Cannot unset property baseForm. The object is immutable.");
+        $analysis = $this->voikko->analyzeWord("kissammeko")[0];
+        unset($analysis->baseForm);
+    }
+
+    public function testAnalysisIsset(): void
+    {
+        $analysis = $this->voikko->analyzeWord("kissammeko")[0];
+        $this->assertTrue(isset($analysis->baseForm));
+    }
+
     public function testTokens(): void
     {
         $this->assertEquals([

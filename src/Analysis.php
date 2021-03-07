@@ -30,9 +30,24 @@ class Analysis
         $this->data = $data;
     }
 
-    public function __get(string $key): string
+    public function __set(string $name, $value): void
     {
-        return $this->data[strtoupper($key)];
+        throw new Exception("Cannot set property $name. The object is immutable.");
+    }
+
+    public function __get(string $name): string
+    {
+        return $this->data[strtoupper($name)];
+    }
+
+    public function __isset(string $name): bool
+    {
+        return isset($this->data[strtoupper($name)]);
+    }
+
+    public function __unset(string $name): void
+    {
+        throw new Exception("Cannot unset property $name. The object is immutable.");
     }
 
     // TODO: make iterable somehow
