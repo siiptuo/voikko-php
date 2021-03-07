@@ -122,14 +122,14 @@ class Voikko
     {
         $result = '';
         $pattern = $this->hyphenationPattern($word);
-        for ($i = 0; $i < strlen($word); $i++) {
+        for ($i = 0; $i < mb_strlen($word); $i++) {
             if ($pattern[$i] == ' ') {
-                $result .= $word[$i];
+                $result .= mb_substr($word, $i, 1);
             } elseif ($pattern[$i] == '-') {
                 $result .= $hyphen;
-                $result .= $word[$i];
+                $result .= mb_substr($word, $i, 1);
             } elseif ($pattern[$i] == '=') {
-                $result .= $word[$i] == '-' ? '-' : $hyphen;
+                $result .= mb_substr($word, $i, 1) == '-' ? '-' : $hyphen;
             }
         }
         return $result;

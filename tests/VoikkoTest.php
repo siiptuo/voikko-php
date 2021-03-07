@@ -42,6 +42,10 @@ final class VoikkoTest extends TestCase
             "lin-ja-au-tom-me-ko",
             $this->voikko->hyphenate("linja-autommeko")
         );
+        $this->assertEquals(
+            "tä-mä-kin-kö",
+            $this->voikko->hyphenate("tämäkinkö")
+        );
     }
 
     public function testHyphenateHtml(): void
@@ -49,6 +53,10 @@ final class VoikkoTest extends TestCase
         $this->assertEquals(
             "lin&shy;ja-au&shy;tom&shy;me&shy;ko",
             $this->voikko->hyphenate("linja-autommeko", "&shy;")
+        );
+        $this->assertEquals(
+            "tä&shy;mä&shy;kin&shy;kö",
+            $this->voikko->hyphenate("tämäkinkö", "&shy;")
         );
     }
 
