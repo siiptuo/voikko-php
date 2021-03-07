@@ -51,6 +51,7 @@ class Voikko
                                           const char * text, size_t textlen, size_t * sentencelen);
                 char ** voikkoSuggestCstr(struct VoikkoHandle * handle, const char * word);
                 int voikkoSpellCstr(struct VoikkoHandle * handle, const char * word);
+                void voikkoFreeCstr(char * cstr);
                 void voikkoFreeCstrArray(char ** cstrArray);
                 ",
                 $libraryPath
@@ -155,7 +156,10 @@ class Voikko
     public function hyphenationPattern(string $word): string
     {
         // TODO: error handling
-        return FFI::string(self::$ffi->voikkoHyphenateCstr($this->voikko, $word));
+        $pattern = self::$ffi->voikkoHyphenateCstr($this->voikko, $word);
+        $result = FFI::string($pattern);
+        self::$ffi->voikkoFreeCstr($pattern);
+        return $result;
     }
 
     /**
