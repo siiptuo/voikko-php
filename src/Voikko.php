@@ -34,8 +34,6 @@ class Voikko
                                                  const char * path);
                 void voikkoTerminate(struct VoikkoHandle * handle);
                 char * voikkoHyphenateCstr(struct VoikkoHandle * handle, const char * word);
-                char * voikkoInsertHyphensCstr(struct VoikkoHandle * handle, const char * word,
-                                               const char * hyphen, int allowContextChanges);
                 struct voikko_mor_analysis;
                 struct voikko_mor_analysis ** voikkoAnalyzeWordCstr(
                                               struct VoikkoHandle * handle, const char * word);
@@ -121,10 +119,21 @@ class Voikko
      * @param bool $allowContextChanges Whether hyphens may be inserted even if they alter the word in unhyphenated form.
      * @return string Hyphenated word
      */
-    public function hyphenate(string $word, string $hyphen = '-', bool $allowContextChanges = true): string
+    public function hyphenate(string $word, string $hyphen = '-'): string
     {
-        // TODO: error handling
-        return FFI::string(self::$ffi->voikkoInsertHyphensCstr($this->voikko, $word, $hyphen, $allowContextChanges));
+        $result = '';
+        $pattern = $this->hyphenationPattern($word);
+        for ($i = 0; $i < strlen($word); $i++) {
+            if ($pattern[$i] == ' ') {
+                $result .= $word[$i];
+            } else if ($pattern[$i] == '-') {
+                $result .= $hyphen;
+                $result .= $word[$i];
+            } else if ($pattern[$i] == '=') {
+                $result .= $word[$i] == '-' ? '-' : $hyphen;
+            }
+        }
+        return $result;
     }
 
     /**
