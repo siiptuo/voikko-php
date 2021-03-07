@@ -116,7 +116,6 @@ class Voikko
      *
      * @param string $word word to hyphenate
      * @param string $hyphen character string to insert at hyphenation positions
-     * @param bool $allowContextChanges Whether hyphens may be inserted even if they alter the word in unhyphenated form.
      * @return string Hyphenated word
      */
     public function hyphenate(string $word, string $hyphen = '-'): string
