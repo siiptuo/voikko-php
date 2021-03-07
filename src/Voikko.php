@@ -116,17 +116,18 @@ class Voikko
      *
      * @param string $word word to hyphenate
      * @param string $hyphen character string to insert at hyphenation positions
+     * @param bool $allowContextChanges Whether hyphens may be inserted even if they alter the word in unhyphenated form.
      * @return string Hyphenated word
      */
-    public function hyphenate(string $word, string $hyphen = '-'): string
+    public function hyphenate(string $word, string $hyphen = '-', $allowContextChanges = true): string
     {
         $result = '';
         $pattern = $this->hyphenationPattern($word);
         for ($i = 0; $i < mb_strlen($word); $i++) {
-            if ($pattern[$i] == ' ') {
-                $result .= mb_substr($word, $i, 1);
-            } elseif ($pattern[$i] == '-') {
+            if ($pattern[$i] == '-') {
                 $result .= $hyphen;
+                $result .= mb_substr($word, $i, 1);
+            } elseif ($pattern[$i] == ' ' || !$allowContextChanges) {
                 $result .= mb_substr($word, $i, 1);
             } elseif ($pattern[$i] == '=') {
                 $result .= mb_substr($word, $i, 1) == '-' ? '-' : $hyphen;
