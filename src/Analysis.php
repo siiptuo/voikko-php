@@ -21,15 +21,25 @@ namespace Siiptuo\Voikko;
  */
 class Analysis
 {
-    /** @internal */
+    /**
+     * @internal
+     * @var array<string, string>
+     */
     private array $data;
 
-    /** @internal */
-    public function __construct($data)
+    /**
+     * @internal
+     * @param array<string, string> $data
+     */
+    public function __construct(array $data)
     {
         $this->data = $data;
     }
 
+    /**
+     * @param string $name
+     * @param mixed $value
+     * */
     public function __set(string $name, $value): void
     {
         throw new Exception("Cannot set property $name. The object is immutable.");
