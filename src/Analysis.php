@@ -35,9 +35,9 @@ class Analysis
         throw new Exception("Cannot set property $name. The object is immutable.");
     }
 
-    public function __get(string $name): string
+    public function __get(string $name): ?string
     {
-        return $this->data[strtoupper($name)];
+        return $this->data[strtoupper($name)] ?? null;
     }
 
     public function __isset(string $name): bool

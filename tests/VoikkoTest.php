@@ -106,6 +106,12 @@ final class VoikkoTest extends TestCase
         $this->assertTrue(isset($analysis->baseForm));
     }
 
+    public function testAnalysisNonExisting(): void
+    {
+        $analysis = $this->voikko->analyzeWord("kissammeko")[0];
+        $this->assertNull($analysis->baseFormi);
+    }
+
     public function testTokens(): void
     {
         $this->assertEquals([
