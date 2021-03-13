@@ -5,7 +5,7 @@ Work-in-progress PHP bindings for [libvoikko](https://voikko.puimula.org/) based
 ## Requirements
 
 - PHP 7.4 or newer with [FFI](https://www.php.net/manual/en/book.ffi.php) extension enabled
-- libvoikko (`libvoikko0` package in Ubuntu)
+- libvoikko (`libvoikko1` package in Ubuntu)
 - Voikko dictionary (`voikko-fi` package in Ubuntu)
 
 ## Example
