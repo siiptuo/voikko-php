@@ -53,6 +53,16 @@ class Voikko
                 int voikkoSpellCstr(struct VoikkoHandle * handle, const char * word);
                 void voikkoFreeCstr(char * cstr);
                 void voikkoFreeCstrArray(char ** cstrArray);
+                struct VoikkoGrammarError;
+                struct VoikkoGrammarError * voikkoNextGrammarErrorCstr(struct VoikkoHandle * handle,
+                    const char * text, size_t textlen, size_t startpos, int skiperrors);
+                int voikkoGetGrammarErrorCode(const struct VoikkoGrammarError * error);
+                size_t voikkoGetGrammarErrorStartPos(const struct VoikkoGrammarError * error);
+                size_t voikkoGetGrammarErrorLength(const struct VoikkoGrammarError * error);
+                const char ** voikkoGetGrammarErrorSuggestions(const struct VoikkoGrammarError * error);
+                void voikkoFreeGrammarError(struct VoikkoGrammarError * error);
+                char * voikkoGetGrammarErrorShortDescription(struct VoikkoGrammarError * error, const char * language);
+                void voikkoFreeErrorMessageCstr(char * message);
                 ",
                 $libraryPath
             );
@@ -245,5 +255,41 @@ class Voikko
             $sentences[] = new Sentence($type, $sentence);
         }
         return $sentences;
+    }
+
+    /**
+     * Check the given text for grammar errors.
+     *
+     * @param string $text Text to check grammar errors in.
+     * @param string $languageCode ISO language code for the language in which error descriptions should be returned
+     * @return array<int, GrammarError> Array of grammar errors
+     */
+    public function grammarErrors(string $text, string $languageCode = 'en')
+    {
+        $this->validateInput($text);
+        $errors = [];
+        $i = 0;
+        while (true) {
+            $error = self::$ffi->voikkoNextGrammarErrorCstr($this->voikko, $text, strlen($text), 0, $i);
+            if (is_null($error)) {
+                break;
+            }
+            $errorCode = self::$ffi->voikkoGetGrammarErrorCode($error);
+            $startPosition = self::$ffi->voikkoGetGrammarErrorStartPos($error);
+            $errorLength = self::$ffi->voikkoGetGrammarErrorLength($error);
+            $suggestions = [];
+            $suggestionsPtr = self::$ffi->voikkoGetGrammarErrorSuggestions($error);
+            $j = 0;
+            while (!FFI::isNull($suggestionsPtr[$j])) {
+                $suggestions[] = FFI::string($suggestionsPtr[$j]);
+                $j++;
+            }
+            $shortDescription = self::$ffi->voikkoGetGrammarErrorShortDescription($error, $languageCode);
+            $errors[] = new GrammarError($errorCode, $startPosition, $errorLength, $suggestions, FFI::string($shortDescription));
+            self::$ffi->voikkoFreeErrorMessageCstr($shortDescription);
+            self::$ffi->voikkoFreeGrammarError($error);
+            $i++;
+        }
+        return $errors;
     }
 }

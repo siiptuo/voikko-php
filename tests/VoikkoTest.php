@@ -5,6 +5,7 @@ use Siiptuo\Voikko\Voikko;
 use Siiptuo\Voikko\Exception;
 use Siiptuo\Voikko\Token;
 use Siiptuo\Voikko\Sentence;
+use Siiptuo\Voikko\GrammarError;
 
 final class VoikkoTest extends TestCase
 {
@@ -144,5 +145,13 @@ final class VoikkoTest extends TestCase
         $this->expectException(Exception::class);
         $this->expectExceptionMessage("Internal error");
         $this->voikko->hyphenate(str_repeat('ö', 1000));
+    }
+
+    public function testGrammarErrors(): void
+    {
+        $this->assertEquals(
+            [new GrammarError(8, 5, 5, ["on"], "Remove duplicate word.")],
+            $this->voikko->grammarErrors('Tämä on on testi.')
+        );
     }
 }
