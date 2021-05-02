@@ -258,9 +258,9 @@ class Voikko
     }
 
     /**
-     * Check the given text for grammar errors.
+     * Check grammar errors in a paragraph or sentence.
      *
-     * @param string $text Text to check grammar errors in.
+     * @param string $text A paragraph or sentence to check grammar errors in.
      * @param string $languageCode ISO language code for the language in which error descriptions should be returned
      * @return array<int, GrammarError> Array of grammar errors
      */

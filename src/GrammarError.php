@@ -14,17 +14,17 @@ class GrammarError
     public int $errorCode;
 
     /**
-     * The starting position of the error in the checked paragraph (in characters).
+     * Start position of the error in characters.
      */
     public int $startPosition;
 
     /**
-     * The length of the error in the checked paragraph (in characters).
+     * Length of the error in characters.
      */
     public int $errorLength;
 
     /**
-     * Suggestions for correcting a grammar error.
+     * Suggestions for correcting the grammar error.
      * @var array<int, string>
      */
     public array $suggestions;
