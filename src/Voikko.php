@@ -21,7 +21,8 @@ use \FFI;
 class Voikko
 {
     /** @internal */
-    private static function getFFI(string $libraryPath): FFI {
+    private static function getFFI(string $libraryPath): FFI
+    {
         return FFI::cdef(
             "
             struct VoikkoHandle;
@@ -321,7 +322,8 @@ class Voikko
      * @param string $libraryPath Path to libvoikko shared library.
      * @return array<int, Dictionary> Array of dictionaries
      */
-    static public function dictionaries(string $dictionaryPath = null, string $libraryPath = "libvoikko.so.1") {
+    public static function dictionaries(string $dictionaryPath = null, string $libraryPath = "libvoikko.so.1")
+    {
         $ffi = self::getFFI($libraryPath);
         $dicts = $ffi->voikko_list_dicts($dictionaryPath);
         $result = [];
