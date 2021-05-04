@@ -21,10 +21,60 @@ use \FFI;
 class Voikko
 {
     /** @internal */
-    private static ?FFI $ffi = null;
+    private static function getFFI(string $libraryPath): FFI {
+        return FFI::cdef(
+            "
+            struct VoikkoHandle;
+            struct VoikkoHandle * voikkoInit(const char ** error, const char * langcode,
+                                             const char * path);
+            void voikkoTerminate(struct VoikkoHandle * handle);
+            char * voikkoHyphenateCstr(struct VoikkoHandle * handle, const char * word);
+            struct voikko_mor_analysis;
+            struct voikko_mor_analysis ** voikkoAnalyzeWordCstr(
+                                          struct VoikkoHandle * handle, const char * word);
+            void voikko_free_mor_analysis(struct voikko_mor_analysis ** analysis);
+            const char ** voikko_mor_analysis_keys(const struct voikko_mor_analysis * analysis);
+            char * voikko_mor_analysis_value_cstr(
+                            const struct voikko_mor_analysis * analysis,
+                            const char * key);
+            void voikko_free_mor_analysis_value_cstr(char * analysis_value);
+            enum voikko_token_type {TOKEN_NONE, TOKEN_WORD, TOKEN_PUNCTUATION, TOKEN_WHITESPACE, TOKEN_UNKNOWN};
+            enum voikko_token_type voikkoNextTokenCstr(struct VoikkoHandle * handle, const char * text,
+                                   size_t textlen, size_t * tokenlen);
+            enum voikko_sentence_type {SENTENCE_NONE, SENTENCE_NO_START, SENTENCE_PROBABLE, SENTENCE_POSSIBLE};
+            enum voikko_sentence_type voikkoNextSentenceStartCstr(struct VoikkoHandle * handle,
+                                      const char * text, size_t textlen, size_t * sentencelen);
+            char ** voikkoSuggestCstr(struct VoikkoHandle * handle, const char * word);
+            int voikkoSpellCstr(struct VoikkoHandle * handle, const char * word);
+            void voikkoFreeCstr(char * cstr);
+            void voikkoFreeCstrArray(char ** cstrArray);
+            struct VoikkoGrammarError;
+            struct VoikkoGrammarError * voikkoNextGrammarErrorCstr(struct VoikkoHandle * handle,
+                const char * text, size_t textlen, size_t startpos, int skiperrors);
+            int voikkoGetGrammarErrorCode(const struct VoikkoGrammarError * error);
+            size_t voikkoGetGrammarErrorStartPos(const struct VoikkoGrammarError * error);
+            size_t voikkoGetGrammarErrorLength(const struct VoikkoGrammarError * error);
+            const char ** voikkoGetGrammarErrorSuggestions(const struct VoikkoGrammarError * error);
+            void voikkoFreeGrammarError(struct VoikkoGrammarError * error);
+            char * voikkoGetGrammarErrorShortDescription(struct VoikkoGrammarError * error, const char * language);
+            void voikkoFreeErrorMessageCstr(char * message);
+            struct voikko_dict;
+            struct voikko_dict ** voikko_list_dicts(const char * path);
+            void voikko_free_dicts(struct voikko_dict ** dicts);
+            const char * voikko_dict_language(const struct voikko_dict * dict);
+            const char * voikko_dict_script(const struct voikko_dict * dict);
+            const char * voikko_dict_variant(const struct voikko_dict * dict);
+            const char * voikko_dict_description(const struct voikko_dict * dict);
+            ",
+            $libraryPath
+        );
+    }
 
     /** @internal */
     private FFI\CData $voikko;
+
+    /** @internal */
+    private FFI $ffi;
 
     /**
      * Initialises the library for use in the specified language, adding an extra directory to the standard dictionary search path.
@@ -37,50 +87,9 @@ class Voikko
      */
     public function __construct(string $languageCode = 'fi', string $dictionaryPath = null, string $libraryPath = "libvoikko.so.1")
     {
-        // XXX: $ffi will be cached even if $libraryPath is different
-        if (self::$ffi == null) {
-            self::$ffi = FFI::cdef(
-                "
-                struct VoikkoHandle;
-                struct VoikkoHandle * voikkoInit(const char ** error, const char * langcode,
-                                                 const char * path);
-                void voikkoTerminate(struct VoikkoHandle * handle);
-                char * voikkoHyphenateCstr(struct VoikkoHandle * handle, const char * word);
-                struct voikko_mor_analysis;
-                struct voikko_mor_analysis ** voikkoAnalyzeWordCstr(
-                                              struct VoikkoHandle * handle, const char * word);
-                void voikko_free_mor_analysis(struct voikko_mor_analysis ** analysis);
-                const char ** voikko_mor_analysis_keys(const struct voikko_mor_analysis * analysis);
-                char * voikko_mor_analysis_value_cstr(
-                                const struct voikko_mor_analysis * analysis,
-                                const char * key);
-                void voikko_free_mor_analysis_value_cstr(char * analysis_value);
-                enum voikko_token_type {TOKEN_NONE, TOKEN_WORD, TOKEN_PUNCTUATION, TOKEN_WHITESPACE, TOKEN_UNKNOWN};
-                enum voikko_token_type voikkoNextTokenCstr(struct VoikkoHandle * handle, const char * text,
-                                       size_t textlen, size_t * tokenlen);
-                enum voikko_sentence_type {SENTENCE_NONE, SENTENCE_NO_START, SENTENCE_PROBABLE, SENTENCE_POSSIBLE};
-                enum voikko_sentence_type voikkoNextSentenceStartCstr(struct VoikkoHandle * handle,
-                                          const char * text, size_t textlen, size_t * sentencelen);
-                char ** voikkoSuggestCstr(struct VoikkoHandle * handle, const char * word);
-                int voikkoSpellCstr(struct VoikkoHandle * handle, const char * word);
-                void voikkoFreeCstr(char * cstr);
-                void voikkoFreeCstrArray(char ** cstrArray);
-                struct VoikkoGrammarError;
-                struct VoikkoGrammarError * voikkoNextGrammarErrorCstr(struct VoikkoHandle * handle,
-                    const char * text, size_t textlen, size_t startpos, int skiperrors);
-                int voikkoGetGrammarErrorCode(const struct VoikkoGrammarError * error);
-                size_t voikkoGetGrammarErrorStartPos(const struct VoikkoGrammarError * error);
-                size_t voikkoGetGrammarErrorLength(const struct VoikkoGrammarError * error);
-                const char ** voikkoGetGrammarErrorSuggestions(const struct VoikkoGrammarError * error);
-                void voikkoFreeGrammarError(struct VoikkoGrammarError * error);
-                char * voikkoGetGrammarErrorShortDescription(struct VoikkoGrammarError * error, const char * language);
-                void voikkoFreeErrorMessageCstr(char * message);
-                ",
-                $libraryPath
-            );
-        }
+        $this->ffi = self::getFFI($libraryPath);
         $error = FFI::new("char*");
-        $handle = self::$ffi->voikkoInit(FFI::addr($error), $languageCode, $dictionaryPath);
+        $handle = $this->ffi->voikkoInit(FFI::addr($error), $languageCode, $dictionaryPath);
         if (!FFI::isNull($error)) {
             throw new Exception(FFI::string($error));
         }
@@ -89,7 +98,7 @@ class Voikko
 
     public function __destruct()
     {
-        self::$ffi->voikkoTerminate($this->voikko);
+        $this->ffi->voikkoTerminate($this->voikko);
     }
 
     /** @internal */
@@ -114,7 +123,7 @@ class Voikko
     public function spell(string $word): bool
     {
         $this->validateInput($word);
-        $result = self::$ffi->voikkoSpellCstr($this->voikko, $word);
+        $result = $this->ffi->voikkoSpellCstr($this->voikko, $word);
         if ($result !== 0 && $result !== 1) {
             throw new Exception('Internal error');
         }
@@ -131,7 +140,7 @@ class Voikko
     {
         $this->validateInput($word);
         $result = [];
-        $suggestions = self::$ffi->voikkoSuggestCstr($this->voikko, $word);
+        $suggestions = $this->ffi->voikkoSuggestCstr($this->voikko, $word);
         if (is_null($suggestions) || FFI::isNull($suggestions[0])) {
             return $result;
         }
@@ -140,7 +149,7 @@ class Voikko
             $result[] = FFI::string($suggestions[$i]);
             $i++;
         }
-        self::$ffi->voikkoFreeCstrArray($suggestions);
+        $this->ffi->voikkoFreeCstrArray($suggestions);
         return $result;
     }
 
@@ -188,12 +197,12 @@ class Voikko
     public function hyphenationPattern(string $word): string
     {
         $this->validateInput($word);
-        $pattern = self::$ffi->voikkoHyphenateCstr($this->voikko, $word);
+        $pattern = $this->ffi->voikkoHyphenateCstr($this->voikko, $word);
         if (is_null($pattern)) {
             throw new Exception("Internal error");
         }
         $result = FFI::string($pattern);
-        self::$ffi->voikkoFreeCstr($pattern);
+        $this->ffi->voikkoFreeCstr($pattern);
         return $result;
     }
 
@@ -207,25 +216,25 @@ class Voikko
     {
         $this->validateInput($word);
         $result = [];
-        $analyses = self::$ffi->voikkoAnalyzeWordCstr($this->voikko, $word);
+        $analyses = $this->ffi->voikkoAnalyzeWordCstr($this->voikko, $word);
         if (is_null($analyses) || FFI::isNull($analyses[0])) {
             return $result;
         }
         $i = 0;
         while (!FFI::isNull($analyses[$i])) {
             $data = [];
-            $keys = self::$ffi->voikko_mor_analysis_keys($analyses[$i]);
+            $keys = $this->ffi->voikko_mor_analysis_keys($analyses[$i]);
             $j = 0;
             while (!FFI::isNull($keys[$j])) {
-                $value = self::$ffi->voikko_mor_analysis_value_cstr($analyses[$i], $keys[$j]);
+                $value = $this->ffi->voikko_mor_analysis_value_cstr($analyses[$i], $keys[$j]);
                 $data[FFI::string($keys[$j])] = FFI::string($value);
-                self::$ffi->voikko_free_mor_analysis_value_cstr($value);
+                $this->ffi->voikko_free_mor_analysis_value_cstr($value);
                 $j++;
             }
             $result[] = new Analysis($data);
             $i++;
         }
-        self::$ffi->voikko_free_mor_analysis($analyses);
+        $this->ffi->voikko_free_mor_analysis($analyses);
         return $result;
     }
 
@@ -241,7 +250,7 @@ class Voikko
         $tokens = [];
         $tokenLength = FFI::new("size_t");
         while (strlen($text) > 0) {
-            $type = self::$ffi->voikkoNextTokenCstr($this->voikko, $text, strlen($text), FFI::addr($tokenLength));
+            $type = $this->ffi->voikkoNextTokenCstr($this->voikko, $text, strlen($text), FFI::addr($tokenLength));
             $token = mb_substr($text, 0, $tokenLength->cdata, 'UTF-8');
             $text = substr($text, strlen($token));
             $tokens[] = new Token($type, $token);
@@ -261,7 +270,7 @@ class Voikko
         $sentences = [];
         $sentenceLength = FFI::new("size_t");
         while (strlen($text) > 0) {
-            $type = self::$ffi->voikkoNextSentenceStartCstr($this->voikko, $text, strlen($text), FFI::addr($sentenceLength));
+            $type = $this->ffi->voikkoNextSentenceStartCstr($this->voikko, $text, strlen($text), FFI::addr($sentenceLength));
             $sentence = mb_substr($text, 0, $sentenceLength->cdata, 'UTF-8');
             $text = substr($text, strlen($sentence));
             $sentences[] = new Sentence($type, $sentence);
@@ -282,26 +291,51 @@ class Voikko
         $errors = [];
         $i = 0;
         while (true) {
-            $error = self::$ffi->voikkoNextGrammarErrorCstr($this->voikko, $text, strlen($text), 0, $i);
+            $error = $this->ffi->voikkoNextGrammarErrorCstr($this->voikko, $text, strlen($text), 0, $i);
             if (is_null($error)) {
                 break;
             }
-            $errorCode = self::$ffi->voikkoGetGrammarErrorCode($error);
-            $startPosition = self::$ffi->voikkoGetGrammarErrorStartPos($error);
-            $errorLength = self::$ffi->voikkoGetGrammarErrorLength($error);
+            $errorCode = $this->ffi->voikkoGetGrammarErrorCode($error);
+            $startPosition = $this->ffi->voikkoGetGrammarErrorStartPos($error);
+            $errorLength = $this->ffi->voikkoGetGrammarErrorLength($error);
             $suggestions = [];
-            $suggestionsPtr = self::$ffi->voikkoGetGrammarErrorSuggestions($error);
+            $suggestionsPtr = $this->ffi->voikkoGetGrammarErrorSuggestions($error);
             $j = 0;
             while (!FFI::isNull($suggestionsPtr[$j])) {
                 $suggestions[] = FFI::string($suggestionsPtr[$j]);
                 $j++;
             }
-            $shortDescription = self::$ffi->voikkoGetGrammarErrorShortDescription($error, $languageCode);
+            $shortDescription = $this->ffi->voikkoGetGrammarErrorShortDescription($error, $languageCode);
             $errors[] = new GrammarError($errorCode, $startPosition, $errorLength, $suggestions, FFI::string($shortDescription));
-            self::$ffi->voikkoFreeErrorMessageCstr($shortDescription);
-            self::$ffi->voikkoFreeGrammarError($error);
+            $this->ffi->voikkoFreeErrorMessageCstr($shortDescription);
+            $this->ffi->voikkoFreeGrammarError($error);
             $i++;
         }
         return $errors;
+    }
+
+    /**
+     * Get a list of available dictionaries.
+     *
+     * @param string $dictionaryPath Path to a directory from which dictionary files should be searched first before looking into the standard dictionary locations.
+     * @param string $libraryPath Path to libvoikko shared library.
+     * @return array<int, Dictionary> Array of dictionaries
+     */
+    static public function dictionaries(string $dictionaryPath = null, string $libraryPath = "libvoikko.so.1") {
+        $ffi = self::getFFI($libraryPath);
+        $dicts = $ffi->voikko_list_dicts($dictionaryPath);
+        $result = [];
+        $i = 0;
+        while (!FFI::isNull($dicts[$i])) {
+            $result[] = new Dictionary(
+                $ffi->voikko_dict_language($dicts[$i]),
+                $ffi->voikko_dict_script($dicts[$i]),
+                $ffi->voikko_dict_variant($dicts[$i]),
+                $ffi->voikko_dict_description($dicts[$i])
+            );
+            $i++;
+        }
+        $ffi->voikko_free_dicts($dicts);
+        return $result;
     }
 }

@@ -17,6 +17,7 @@ use Siiptuo\Voikko\Exception;
 use Siiptuo\Voikko\Token;
 use Siiptuo\Voikko\Sentence;
 use Siiptuo\Voikko\GrammarError;
+use Siiptuo\Voikko\Dictionary;
 
 final class VoikkoTest extends TestCase
 {
@@ -163,6 +164,14 @@ final class VoikkoTest extends TestCase
         $this->assertEquals(
             [new GrammarError(8, 5, 5, ["on"], "Remove duplicate word.")],
             $this->voikko->grammarErrors('Tämä on on testi.')
+        );
+    }
+
+    public function testDictionaries(): void
+    {
+        $this->assertEquals(
+            [new Dictionary("fi", "", "standard", "suomi (perussanasto)")],
+            Voikko::dictionaries()
         );
     }
 }
