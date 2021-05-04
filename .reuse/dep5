@@ -1,0 +1,5 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+
+Files: composer.json composer.lock
+Copyright: 2021 Tuomas Siipola
+License: CC0-1.0
