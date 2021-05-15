@@ -66,6 +66,8 @@ class Voikko
             const char * voikko_dict_script(const struct voikko_dict * dict);
             const char * voikko_dict_variant(const struct voikko_dict * dict);
             const char * voikko_dict_description(const struct voikko_dict * dict);
+            int voikkoSetBooleanOption(struct VoikkoHandle * handle, int option, int value);
+            int voikkoSetIntegerOption(struct VoikkoHandle * handle, int option, int value);
             ",
             $libraryPath
         );
@@ -339,5 +341,235 @@ class Voikko
         }
         $ffi->voikko_free_dicts($dicts);
         return $result;
+    }
+
+    /**
+     * Sets a boolean option.
+     *
+     * @param int $option option name
+     * @param bool $value option value
+     * @throws Exception if setting option failed
+     * @internal
+     */
+    private function setBooleanOption(int $option, bool $value): void
+    {
+        if (!$this->ffi->voikkoSetBooleanOption($this->voikko, $option, $value)) {
+            throw new Exception("Failed to set boolean option");
+        }
+    }
+
+    /**
+     * Sets an integer option.
+     *
+     * @param int $option option name
+     * @param int $value option value
+     * @throws Exception if setting option failed
+     * @internal
+     */
+    private function setIntegerOption(int $option, int $value): void
+    {
+        if (!$this->ffi->voikkoSetIntegerOption($this->voikko, $option, $value)) {
+            throw new Exception("Failed to set integer option");
+        }
+    }
+
+    /**
+     * Ignore dot at the end of the word (needed for use in some word
+     * processors).
+     *
+     * If this option is set and input word ends with a dot, spell checking and
+     * hyphenation functions try to analyze the word without the dot if no
+     * results can be obtained for the original form. Also with this option,
+     * string tokenizer will consider trailing dot of a word to be a part of
+     * that word.
+     *
+     * Default: false
+     */
+    public function setIgnoreDot(bool $value): void
+    {
+        $this->setBooleanOption(0, $value);
+    }
+
+    /**
+     * Ignore words containing numbers (spell checking only)
+     *
+     * Default: false
+     */
+    public function setIgnoreNumbers(bool $value): void
+    {
+        $this->setBooleanOption(1, $value);
+    }
+
+    /**
+     * Accept words that are written completely in uppercase letters without
+     * checking them at all.
+     *
+     * Default: false
+     */
+    public function setIgnoreUppercase(bool $value): void
+    {
+        $this->setBooleanOption(3, $value);
+    }
+
+    /**
+     * Accept words even when the first letter is in uppercase (start of
+     * sentence etc.)
+     *
+     * Default: true
+     */
+    public function setAcceptFirstUppercase(bool $value): void
+    {
+        $this->setBooleanOption(6, $value);
+    }
+
+    /**
+     * Accept words even when all of the letters are in uppercase.
+     *
+     * Note that this is not the same as `setIgnoreUppercase`: with this option
+     * the word is still checked, only case differences are ignored.
+     *
+     * Default: true
+     */
+    public function setAcceptAllUppercase(bool $value): void
+    {
+        $this->setBooleanOption(7, $value);
+    }
+
+    /**
+     * Do not insert hyphenation positions that are considered to be ugly but
+     * correct
+     *
+     * Default: false
+     */
+    public function setNoUglyHyphenation(bool $value): void
+    {
+        $this->setBooleanOption(4, $value);
+    }
+
+    /**
+     * Use suggestions optimized for optical character recognition software.
+     *
+     * By default suggestions are optimized for typing errors.
+     *
+     * Default: false
+     */
+    public function setOcrSuggestions(bool $value): void
+    {
+        $this->setBooleanOption(8, $value);
+    }
+
+    /**
+     * Ignore non-words such as URLs and email addresses (spell checking only)
+     *
+     * Default: true
+     */
+    public function setIgnoreNonwords(bool $value): void
+    {
+        $this->setBooleanOption(10, $value);
+    }
+
+    /**
+     * Allow some extra hyphens in words (spell checking only)
+     *
+     * This option relaxes hyphen checking rules to work around some unresolved
+     * issues in the underlying morphology, but it may cause some incorrect
+     * words to be accepted. The exact behavior (if any) of this option is not
+     * specified.
+     *
+     * Default: false
+     */
+    public function setAcceptExtraHyphens(bool $value): void
+    {
+        $this->setBooleanOption(11, $value);
+    }
+
+    /**
+     * Accept missing hyphens at the start and end of the word (spell checking
+     * only)
+     *
+     * Some application programs do not consider hyphens to be word characters.
+     * This is reasonable assumption for many languages but not for Finnish. If
+     * the application cannot be fixed to use proper tokenisation algorithm for
+     * Finnish, this option may be used to tell libvoikko to work around this
+     * defect.
+     *
+     * Default: false
+     */
+    public function setAcceptMissingHyphens(bool $value): void
+    {
+        $this->setBooleanOption(12, $value);
+    }
+
+    /**
+     * Accept incomplete sentences that could occur in titles or headings
+     * (grammar checking only)
+     *
+     * Set this option to true if your application is not able to differentiate
+     * titles from normal text paragraphs, or if you know that you are checking
+     * title text.
+     *
+     * Default: false
+     */
+    public function setAcceptTitlesInGc(bool $value): void
+    {
+        $this->setBooleanOption(13, $value);
+    }
+
+    /**
+     * Accept incomplete sentences at the end of the paragraph (grammar
+     * checking only)
+     *
+     * These may exist when text is still being written.
+     *
+     * Default: false
+     */
+    public function setAcceptUnfinishedParagraphsInGc(bool $value): void
+    {
+        $this->setBooleanOption(14, $value);
+    }
+
+    /**
+     * Hyphenate unknown words (hyphenation only)
+     *
+     * Default: true
+     */
+    public function setHyphenateUnknownWords(bool $value): void
+    {
+        $this->setBooleanOption(15, $value);
+    }
+
+    /**
+     * Accept paragraphs if they would be valid within bulleted lists (grammar
+     * checking only)
+     *
+     * Default: false
+     */
+    public function setAcceptBulletedListsInGc(bool $value): void
+    {
+        $this->setBooleanOption(16, $value);
+    }
+
+    /**
+     * Set the minimum length for words that may be hyphenated.
+     *
+     * This limit is also enforced on individual parts of compound words.
+     *
+     * Default: 2
+     */
+    public function setMinHyphenatedWordLength(int $value): void
+    {
+        $this->setIntegerOption(9, $value);
+    }
+
+    /**
+     * Set the size of the spell checker cache.
+     *
+     * This can be -1 (no cache) or >= 0 (size in bytes = `2^cache_size * (6544*sizeof(wchar_t) + 1008)`).
+     *
+     * Default: 0
+     */
+    public function setSpellerCacheSize(int $value): void
+    {
+        $this->setIntegerOption(17, $value);
     }
 }

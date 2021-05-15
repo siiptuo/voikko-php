@@ -174,4 +174,30 @@ final class VoikkoTest extends TestCase
             Voikko::dictionaries()
         );
     }
+
+    public function testMinHyphenateSetting(): void
+    {
+        $this->assertEquals(
+            'kis-sa',
+            $this->voikko->hyphenate('kissa')
+        );
+        $this->voikko->setMinHyphenatedWordLength(6);
+        $this->assertEquals(
+            'kissa',
+            $this->voikko->hyphenate('kissa')
+        );
+    }
+
+    public function testUnknownHyphenateSetting(): void
+    {
+        $this->assertEquals(
+            'ree-na-pu-la-ri',
+            $this->voikko->hyphenate('reenapulari')
+        );
+        $this->voikko->setHyphenateUnknownWords(false);
+        $this->assertEquals(
+            'reenapulari',
+            $this->voikko->hyphenate('reenapulari')
+        );
+    }
 }
