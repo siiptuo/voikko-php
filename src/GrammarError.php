@@ -46,7 +46,10 @@ class GrammarError
      */
     public string $shortDescription;
 
-    /** @internal */
+    /**
+     * @internal
+     * @param array<int, string> $suggestions
+     */
     public function __construct(int $errorCode, int $startPosition, int $errorLength, array $suggestions, string $shortDescription)
     {
         $this->errorCode = $errorCode;
