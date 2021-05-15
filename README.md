@@ -5,7 +5,7 @@ SPDX-License-Identifier: CC0-1.0
 
 # voikko-php
 
-Work-in-progress PHP bindings for [libvoikko](https://voikko.puimula.org/) based on [PHP FFI](https://www.php.net/manual/en/book.ffi.php).
+PHP bindings for [libvoikko](https://voikko.puimula.org/) based on [PHP FFI](https://www.php.net/manual/en/book.ffi.php).
 
 ## Requirements
 
@@ -13,7 +13,6 @@ Work-in-progress PHP bindings for [libvoikko](https://voikko.puimula.org/) based
 - libvoikko (`libvoikko1` package in Ubuntu)
 - Voikko dictionary (`voikko-fi` package in Ubuntu)
 
-<!--
 ## Installation
 
 Install via [Composer](https://getcomposer.org/):
@@ -21,7 +20,6 @@ Install via [Composer](https://getcomposer.org/):
 ```sh
 composer require siiptuo/voikko
 ```
--->
 
 ## Example
 
